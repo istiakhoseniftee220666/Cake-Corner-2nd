@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cake Corner — Admin Panel</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-gradient: linear-gradient(135deg, #1C1917 0%, #292524 50%, #44403C 100%);
+  --card-bg: rgba(255, 255, 255, 0.96);
+  --primary: #E11D48;
+  --primary-dark: #9F1239;
+  --accent: #BE123C;
+  --mint: #FB7185;
+  --dark-text: #1E1B18;
+  --muted-text: #6B7280;
+  --border: #E5E7EB;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Hind Siliguri', 'Plus Jakarta Sans', sans-serif; background: var(--bg-gradient); color: var(--dark-text); padding: 24px; min-height: 100vh; }
+.container { max-width: 1050px; margin: 0 auto; }
+
+/* ===== Login Screen ===== */
+.login-screen {
+  max-width: 420px; margin: 80px auto; background: var(--card-bg);
+  padding: 40px 32px; border-radius: 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  position: relative; overflow: hidden;
+}
+.login-screen::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+  background: linear-gradient(90deg, var(--mint), var(--primary), var(--accent));
+}
+.login-screen h2 { color: var(--primary-dark); margin-bottom: 8px; font-size: 1.7rem; font-weight: 700; }
+.login-screen p { margin-bottom: 24px; color: var(--muted-text); font-size: 0.92rem; }
+.login-screen input {
+  width: 100%; padding: 14px 16px; margin-bottom: 16px;
+  border: 2px solid var(--border); border-radius: 12px; font-size: 0.95rem;
+  transition: all 0.3s; background: #F8FAFC;
+}
+.login-screen input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.15); background: white; }
+.login-btn {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; border: none; border-radius: 12px;
+  font-weight: 700; cursor: pointer; font-size: 1.05rem;
+  transition: all 0.3s; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.3);
+}
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 25px rgba(225, 29, 72, 0.4); }
+.login-btn:disabled { opacity: 0.7; transform: none; cursor: wait; }
+
+/* ===== Admin Content ===== */
+.admin-content { display: none; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+.header-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 16px;
+  background: var(--card-bg); padding: 20px 28px; border-radius: var(--radius);
+  box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.4);
+}
+.logout-btn {
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white; border: none; padding: 10px 20px;
+  border-radius: 10px; font-weight: 700; cursor: pointer;
+  transition: all 0.3s; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.25);
+}
+.logout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.35); }
+
+/* ===== Stats Cards ===== */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 18px; margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--card-bg); padding: 22px; border-radius: var(--radius);
+  box-shadow: var(--shadow); border: 1px solid rgba(255,255,255,0.3);
+  text-align: center; transition: all 0.3s; position: relative; overflow: hidden;
+}
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); }
+.stat-icon { font-size: 2.2rem; margin-bottom: 6px; }
+.stat-value { font-size: 1.9rem; font-weight: 800; color: var(--primary-dark); }
+.stat-label { font-size: 0.9rem; color: var(--muted-text); font-weight: 600; margin-top: 2px; }
+
+/* ===== Cards ===== */
+.card {
+  background: var(--card-bg); padding: 28px; border-radius: var(--radius);
+  box-shadow: var(--shadow); margin-bottom: 24px;
+  border: 1px solid rgba(255,255,255,0.3); transition: all 0.3s;
+}
+
+/* ===== Search Bar ===== */
+.search-box {
+  width: 100%; padding: 13px 18px; border: 2px solid var(--border);
+  border-radius: 12px; font-size: 0.95rem; margin-bottom: 18px;
+  transition: all 0.3s; background: #F8FAFC;
+}
+.search-box:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.15); background: white; }
+
+/* ===== Table ===== */
+.table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+table { width: 100%; border-collapse: collapse; background: white; }
+th, td { border-bottom: 1px solid var(--border); padding: 14px; text-align: left; font-size: 0.92rem; }
+th {
+  background: #FFF1F2; color: var(--primary-dark); font-weight: 700;
+  position: sticky; top: 0; z-index: 10; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;
+}
+tr { transition: all 0.2s; }
+tr:hover { background: #FFF1F2; }
+
+.action-btn {
+  padding: 7px 14px; font-size: 0.82rem; margin-right: 6px;
+  border-radius: 8px; border: none; cursor: pointer; color: white; font-weight: 600;
+  transition: all 0.2s;
+}
+.action-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+.edit-btn { background: linear-gradient(135deg, #2563EB, #1D4ED8); }
+.delete-btn { background: linear-gradient(135deg, #EF4444, #DC2626); }
+
+.status-tag { padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; display: inline-block; }
+.status-active { background: #DCFCE7; color: #15803D; }
+.status-disabled { background: #FEE2E2; color: #B91C1C; }
+
+/* ===== Modal ===== */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(6px);
+  display: none; align-items: flex-end; justify-content: center;
+  z-index: 2000; padding: 0;
+}
+.modal-overlay.active { display: flex; }
+.modal-content {
+  background: white; border-radius: 24px 24px 0 0;
+  padding: 32px; width: 100%; max-width: 540px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.form-group { margin-bottom: 16px; }
+label { font-weight: 600; display: block; margin-bottom: 6px; color: var(--dark-text); font-size: 0.92rem; }
+input, textarea, select {
+  width: 100%; padding: 12px 14px; border: 2px solid var(--border);
+  border-radius: 10px; font-family: inherit; font-size: 0.95rem;
+  transition: all 0.3s; background: #F8FAFC;
+}
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.15); background: white; }
+
+/* Drag & Drop Zone */
+.drop-zone {
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+  padding: 24px 16px;
+  text-align: center;
+  background-color: #FFF1F2;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  background-color: #FFE4E6;
+  border-color: var(--primary-dark);
+}
+.drop-zone-content p { margin: 6px 0; color: var(--dark-text); font-size: 0.9rem; }
+.drop-zone-content p span { color: var(--primary); font-weight: bold; }
+.drop-zone-content small { color: var(--muted-text); }
+
+.preview-container {
+  position: relative; width: 100%; max-height: 200px;
+  overflow: hidden; border-radius: 10px; border: 1px solid var(--border);
+}
+.preview-container img { width: 100%; height: 200px; object-fit: cover; display: block; }
+.remove-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(225, 29, 72, 0.9); color: white;
+  border: none; border-radius: 50%; width: 28px; height: 28px;
+  cursor: pointer; font-weight: bold; line-height: 28px; text-align: center;
+}
+
+.add-main-btn {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: white; border: none; padding: 11px 22px;
+  border-radius: 12px; font-weight: 700; cursor: pointer;
+  transition: all 0.3s; box-shadow: 0 4px 15px rgba(225, 29, 72, 0.25);
+}
+.add-main-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35); }
+
+.submit-btn {
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white; border: none; padding: 12px 24px;
+  border-radius: 10px; font-weight: 700; cursor: pointer;
+  transition: all 0.3s; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35); }
+
+.close-modal-btn {
+  background: #E2E8F0; color: #475569; border: none;
+  padding: 12px 22px; border-radius: 10px; cursor: pointer;
+  margin-left: 10px; font-weight: 600; transition: all 0.2s;
+}
+.close-modal-btn:hover { background: #CBD5E1; }
+
+.hidden { display: none !important; }
+
+/* ===== Toast ===== */
+.toast-container {
+  position: fixed; top: 20px; right: 20px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.toast {
+  background: white; padding: 14px 22px; border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-left: 4px solid var(--primary);
+  font-weight: 600; color: var(--dark-text); transform: translateX(120%);
+  transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  min-width: 260px;
+}
+.toast.show { transform: translateX(0); }
+.toast.success { border-left-color: #10B981; }
+.toast.error { border-left-color: #EF4444; }
+
+@media (max-width: 600px) {
+  body { padding: 12px; }
+  .login-screen { margin: 40px auto; padding: 28px 20px; }
+  .card { padding: 20px; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .header-bar { padding: 16px; }
+  .modal-content { padding: 22px; border-radius: 20px 20px 0 0; }
+  th, td { padding: 10px 8px; font-size: 0.85rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Login -->
+  <div class="login-screen" id="loginBox">
+    <h2>🔑 Admin Login</h2>
+    <p>আপনার Firebase Admin Email ও Password দিয়ে প্রবেশ করুন</p>
+    <form id="adminLoginForm">
+      <input type="email" id="adminEmailInput" placeholder="Admin Email..." required>
+      <input type="password" id="adminPassInput" placeholder="Password..." required>
+      <button type="submit" class="login-btn" id="loginSubmitBtn">লগইন করুন</button>
+    </form>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="admin-content" id="adminPanelContent">
+    <div class="header-bar">
+      <div>
+        <h1 style="color:var(--primary-dark); font-size:1.5rem; font-weight:800;">⚙️ Cake Corner Admin</h1>
+        <small style="color:var(--muted-text); font-size:0.85rem;" id="userEmailBadge"></small>
+      </div>
+      <button class="logout-btn" id="logoutBtn">🚪 লগআউট</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon">🍰</div><div class="stat-value" id="statTotal">0</div><div class="stat-label">মোট কেক</div></div>
+      <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" id="statActive">0</div><div class="stat-label">অ্যাক্টিভ</div></div>
+      <div class="stat-card"><div class="stat-icon">🚫</div><div class="stat-value" id="statDisabled">0</div><div class="stat-label">ডিজেবল</div></div>
+      <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-value" id="statOffers">0</div><div class="stat-label">অফার চলছে</div></div>
+    </div>
+
+    <!-- WhatsApp Settings -->
+    <div class="card">
+      <h2 style="color:var(--primary-dark); margin-bottom:12px; font-size:1.2rem; font-weight:700;">📱 WhatsApp নম্বর আপডেট</h2>
+      <div class="form-group" style="margin-top: 10px;">
+        <label>অর্ডার পাওয়ার নম্বর (যেমন: 01712345678)</label>
+        <input type="text" id="settingWa" placeholder="017xxxxxxxx">
+      </div>
+      <button class="add-main-btn" id="saveSettingsBtn">সেটিং সেভ করুন</button>
+    </div>
+
+    <!-- Cake List -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <h2 style="color:var(--primary-dark); font-size:1.2rem; font-weight:700;">🍰 বর্তমান কেকের তালিকা</h2>
+        <button class="add-main-btn" id="openAddModalBtn">➕ নতুন কেক যুক্ত করুন</button>
+      </div>
+      
+      <input type="text" class="search-box" id="cakeSearch" placeholder="🔍 কেকের নামে সার্চ করুন...">
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ছবি</th>
+              <th>নাম</th>
+              <th>দাম</th>
+              <th>স্ট্যাটাস</th>
+              <th>অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody id="adminCakeTable">
+            <tr><td colspan="5" style="text-align:center; padding:30px; color:#888;">লোডিং...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="cakeModal">
+  <div class="modal-content">
+    <h2 id="formTitle" style="color:var(--primary-dark); margin-bottom:18px; font-weight:700;">➕ নতুন কেক যুক্ত করুন</h2>
+    <form id="cakeForm">
+      <input type="hidden" id="editCakeId">
+      
+      <div class="form-group">
+        <label>কেকের নাম *</label>
+        <input type="text" id="cakeName" required placeholder="যেমন: চকলেট লাভ কেক">
+      </div>
+
+      <div class="form-group">
+        <label>বর্ণনা (Description)</label>
+        <textarea id="cakeDesc" rows="2" placeholder="ছোট বিবরণ..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>মূল দাম (৳) *</label>
+        <input type="number" id="cakePrice" required placeholder="500">
+      </div>
+
+      <div class="form-group">
+        <label>অফার দাম (৳) (যদি থাকে)</label>
+        <input type="number" id="cakeOfferPrice" placeholder="450">
+      </div>
+
+      <div class="form-group">
+        <label>অফার ব্যাজ/টাইটেল</label>
+        <input type="text" id="cakeOfferTitle" placeholder="স্পেশাল অফার">
+      </div>
+
+      <!-- Drag & Drop File Gallery Zone -->
+      <div class="form-group">
+        <label>📸 কেকের ছবি সিলেক্ট করুন *</label>
+        <div id="drop-zone" class="drop-zone">
+          <div class="drop-zone-content" id="drop-zone-content">
+            <p>🖼️ ছবি টেনে এনে ছাড়ুন অথবা <span>গ্যালারি থেকে সিলেক্ট করুন</span></p>
+            <small>(অটোমেটিক সাইজ ছোট ও JPG-তে কনভার্ট হবে)</small>
+          </div>
+          
+          <input type="file" id="cakeFileInput" accept="image/*" hidden>
+
+          <div id="preview-container" class="preview-container hidden">
+            <img id="image-preview" src="" alt="Preview">
+            <button id="remove-btn" type="button" class="remove-btn">✕</button>
+          </div>
+        </div>
+        <small id="uploadStatusText" style="display:block; margin-top:6px; font-weight:600; text-align:center;"></small>
+      </div>
+
+      <div class="form-group" style="display: flex; align-items: center; gap: 10px; background: #FEE2E2; padding: 12px; border-radius: 10px;">
+        <input type="checkbox" id="cakeDisable" style="width: 20px; height: 20px; cursor:pointer;">
+        <label for="cakeDisable" style="margin:0; cursor:pointer; color:#B91C1C; font-size:0.95rem;">🚫 পণ্যটি সাময়িকভাবে ডিজেবল (হাইড) করুন</label>
+      </div>
+
+      <div style="margin-top: 22px; text-align: right;">
+        <button type="submit" class="submit-btn" id="submitBtn">সেভ করুন</button>
+        <button type="button" class="close-modal-btn" id="closeModalBtn">বন্ধ করুন</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getDatabase, ref, set, push, onValue, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyD8-zoM6J48Yiwc4lH71ubpVOmUDZtw92M",
+  authDomain: "my-cake-21122.firebaseapp.com",
+  databaseURL: "https://my-cake-21122-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "my-cake-21122",
+  storageBucket: "my-cake-21122.firebasestorage.app",
+  messagingSenderId: "565517966344",
+  appId: "1:565517966344:web:6247018a8e59298cfb45bd"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+// 🔑 আপনার ImgBB API Key যুক্ত করা হয়েছে
+const IMGBB_API_KEY = "e36d6e260487f152990335f064159017"; 
+
+const DEFAULT_IMAGE = "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500&q=80";
+
+/* ===== Toast ===== */
+function showToast(message, type = 'default') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+/* ===== DOM Elements ===== */
+const loginBox = document.getElementById('loginBox');
+const adminPanelContent = document.getElementById('adminPanelContent');
+const userEmailBadge = document.getElementById('userEmailBadge');
+const loginForm = document.getElementById('adminLoginForm');
+const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const cakeModal = document.getElementById('cakeModal');
+const openAddModalBtn = document.getElementById('openAddModalBtn');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const cakeForm = document.getElementById('cakeForm');
+const formTitle = document.getElementById('formTitle');
+const submitBtn = document.getElementById('submitBtn');
+const adminCakeTable = document.getElementById('adminCakeTable');
+const cakeSearch = document.getElementById('cakeSearch');
+const settingWa = document.getElementById('settingWa');
+const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+// Image Elements
+const dropZone = document.getElementById('drop-zone');
+const cakeFileInput = document.getElementById('cakeFileInput');
+const dropZoneContent = document.getElementById('drop-zone-content');
+const previewContainer = document.getElementById('preview-container');
+const imagePreview = document.getElementById('image-preview');
+const removeBtn = document.getElementById('remove-btn');
+const uploadStatusText = document.getElementById('uploadStatusText');
+
+let allCakes = {};
+let selectedFile = null;
+let currentUploadedUrl = "";
+
+/* ===== Auth ===== */
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('adminEmailInput').value;
+  const password = document.getElementById('adminPassInput').value;
+  loginSubmitBtn.disabled = true;
+  loginSubmitBtn.textContent = 'লোড হচ্ছে...';
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    showToast('সফলভাবে লগইন হয়েছে!', 'success');
+  } catch (err) {
+    showToast('লগইন ব্যর্থ: ' + err.message, 'error');
+  } finally {
+    loginSubmitBtn.disabled = false;
+    loginSubmitBtn.textContent = 'লগইন করুন';
+  }
+});
+
+logoutBtn.addEventListener('click', async () => {
+  await signOut(auth);
+  showToast('লগআউট সম্পন্ন', 'success');
+});
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    loginBox.style.display = 'none';
+    adminPanelContent.style.display = 'block';
+    userEmailBadge.textContent = user.email;
+  } else {
+    loginBox.style.display = 'block';
+    adminPanelContent.style.display = 'none';
+    userEmailBadge.textContent = '';
+  }
+});
+
+/* ===== File Input & Drag-Drop ===== */
+dropZone.addEventListener('click', (e) => {
+  if (e.target !== removeBtn) cakeFileInput.click();
+});
+
+cakeFileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) handleFileSelect(e.target.files[0]);
+});
+
+['dragenter', 'dragover'].forEach(name => {
+  dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+});
+['dragleave', 'drop'].forEach(name => {
+  dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+});
+
+dropZone.addEventListener('drop', (e) => {
+  if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files[0]);
+});
+
+function handleFileSelect(file) {
+  if (!file.type.startsWith('image/')) {
+    showToast('শুধুমাত্র ছবি সিলেক্ট করুন!', 'error');
+    return;
+  }
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    imagePreview.src = e.target.result;
+    dropZoneContent.classList.add('hidden');
+    previewContainer.classList.remove('hidden');
+    uploadStatusText.textContent = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+removeBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  resetImageSelection();
+});
+
+function resetImageSelection() {
+  selectedFile = null;
+  currentUploadedUrl = "";
+  cakeFileInput.value = '';
+  imagePreview.src = '';
+  previewContainer.classList.add('hidden');
+  dropZoneContent.classList.remove('hidden');
+  uploadStatusText.textContent = '';
+}
+
+/* ===== Client-side Image Processing (Resize & JPG Conversion) ===== */
+function processImage(file, maxWidth = 800, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (e) => {
+      const img = new Image();
+      img.src = e.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to JPG blob
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error('Image processing failed'));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+}
+
+/* ===== ImgBB Upload Function ===== */
+async function uploadToImgBB(imageBlob) {
+  const formData = new FormData();
+  formData.append('image', imageBlob);
+
+  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+    method: 'POST',
+    body: formData
+  });
+
+  const data = await res.json();
+  if (data && data.success) {
+    return data.data.url;
+  } else {
+    throw new Error('ImgBB-তে আপলোড ব্যর্থ হয়েছে। Key ঠিক আছে তো?');
+  }
+}
+
+/* ===== Modal Control ===== */
+function openModal(isEdit = false) {
+  cakeModal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  if (!isEdit) {
+    formTitle.textContent = '➕ নতুন কেক যুক্ত করুন';
+    cakeForm.reset();
+    document.getElementById('editCakeId').value = '';
+    resetImageSelection();
+    submitBtn.textContent = 'সেভ করুন';
+  }
+}
+
+function closeModal() {
+  cakeModal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+openAddModalBtn.addEventListener('click', () => openModal(false));
+closeModalBtn.addEventListener('click', closeModal);
+cakeModal.addEventListener('click', (e) => { if (e.target === cakeModal) closeModal(); });
+
+/* ===== Settings ===== */
+onValue(ref(db, 'siteSettings/whatsapp'), (snap) => {
+  if (snap.exists()) settingWa.value = snap.val();
+});
+
+saveSettingsBtn.addEventListener('click', async () => {
+  const wa = settingWa.value.trim();
+  if (!wa) { showToast('নম্বর দিন!', 'error'); return; }
+  try {
+    await set(ref(db, 'siteSettings/whatsapp'), wa);
+    showToast('WhatsApp নম্বর সেভ হয়েছে!', 'success');
+  } catch (err) { showToast('এরর: ' + err.message, 'error'); }
+});
+
+/* ===== Cake Table Render & CRUD ===== */
+function renderTable(dataObj) {
+  adminCakeTable.innerHTML = '';
+  if (!dataObj || Object.keys(dataObj).length === 0) {
+    adminCakeTable.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:30px; color:#888;">কোনো কেক পাওয়া যায়নি</td></tr>';
+    updateStats({});
+    return;
+  }
+
+  Object.entries(dataObj).forEach(([id, cake]) => {
+    const tr = document.createElement('tr');
+    const imgUrl = cake.image && cake.image.trim() !== '' ? cake.image : DEFAULT_IMAGE;
+    const hasOffer = cake.offerPrice && Number(cake.offerPrice) > 0 && Number(cake.offerPrice) < Number(cake.price);
+    const displayPrice = hasOffer ? `${cake.offerPrice} <span style="text-decoration:line-through; color:#94A3B8; font-size:0.8rem;">৳${cake.price}</span>` : `৳${cake.price}`;
+    const statusHtml = cake.disabled 
+      ? '<span class="status-tag status-disabled">🚫 ডিজেবল</span>' 
+      : '<span class="status-tag status-active">✅ অ্যাক্টিভ</span>';
+
+    tr.innerHTML = `
+      <td><img src="${imgUrl}" style="width:46px; height:46px; object-fit:cover; border-radius:10px; box-shadow:0 2px 6px rgba(0,0,0,0.1);" onerror="this.src='${DEFAULT_IMAGE}'"></td>
+      <td><b>${cake.name}</b>${cake.offerTitle ? `<br><small style="color:var(--primary-dark);">🔥 ${cake.offerTitle}</small>` : ''}</td>
+      <td>${displayPrice}</td>
+      <td>${statusHtml}</td>
+      <td>
+        <button class="action-btn edit-btn" data-id="${id}">✏️ এডিট</button>
+        <button class="action-btn delete-btn" data-id="${id}">🗑️ ডিলিট</button>
+      </td>
+    `;
+    adminCakeTable.appendChild(tr);
+  });
+
+  document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', () => loadCakeForEdit(btn.dataset.id)));
+  document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', () => deleteCake(btn.dataset.id)));
+
+  updateStats(dataObj);
+}
+
+function updateStats(dataObj) {
+  if (!dataObj) dataObj = {};
+  const cakes = Object.values(dataObj);
+  document.getElementById('statTotal').textContent = cakes.length;
+  document.getElementById('statActive').textContent = cakes.filter(c => !c.disabled).length;
+  document.getElementById('statDisabled').textContent = cakes.filter(c => c.disabled).length;
+  document.getElementById('statOffers').textContent = cakes.filter(c => c.offerPrice && Number(c.offerPrice) > 0 && Number(c.offerPrice) < Number(c.price) && !c.disabled).length;
+}
+
+onValue(ref(db, 'cakes'), (snap) => {
+  allCakes = snap.exists() ? snap.val() : {};
+  const term = cakeSearch.value.trim().toLowerCase();
+  if (term) {
+    const filtered = {};
+    Object.entries(allCakes).forEach(([id, cake]) => { if (cake.name && cake.name.toLowerCase().includes(term)) filtered[id] = cake; });
+    renderTable(filtered);
+  } else { renderTable(allCakes); }
+});
+
+cakeSearch.addEventListener('input', (e) => {
+  const term = e.target.value.trim().toLowerCase();
+  if (!term) { renderTable(allCakes); return; }
+  const filtered = {};
+  Object.entries(allCakes).forEach(([id, cake]) => { if (cake.name && cake.name.toLowerCase().includes(term)) filtered[id] = cake; });
+  renderTable(filtered);
+});
+
+/* ===== Form Submit Action ===== */
+cakeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const editId = document.getElementById('editCakeId').value;
+  const name = document.getElementById('cakeName').value.trim();
+  const description = document.getElementById('cakeDesc').value.trim();
+  const price = Number(document.getElementById('cakePrice').value);
+  const offerPrice = document.getElementById('cakeOfferPrice').value ? Number(document.getElementById('cakeOfferPrice').value) : null;
+  const offerTitle = document.getElementById('cakeOfferTitle').value.trim();
+  const disabled = document.getElementById('cakeDisable').checked;
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = 'প্রসেসিং হচ্ছে...';
+
+  try {
+    let finalImageUrl = currentUploadedUrl;
+
+    // যদি নতুন ফাইল সিলেক্ট করা হয়
+    if (selectedFile) {
+      uploadStatusText.textContent = '⚡ ছবি প্রসেস ও ImgBB-তে আপলোড হচ্ছে...';
+      uploadStatusText.style.color = 'var(--primary)';
+
+      // ১. রিসাইজ ও JPG কনভার্ট
+      const processedBlob = await processImage(selectedFile, 800, 0.8);
+      
+      // ২. ImgBB-তে আপলোড
+      finalImageUrl = await uploadToImgBB(processedBlob);
+    }
+
+    const cakeData = {
+      name, description, price,
+      offerPrice: offerPrice || null,
+      offerTitle: offerTitle || null,
+      image: finalImageUrl || null,
+      disabled: disabled || false
+    };
+
+    // ৩. Firebase Realtime Database-এ সেভ
+    if (editId) {
+      await set(ref(db, 'cakes/' + editId), cakeData);
+      showToast('কেক সফলভাবে আপডেট হয়েছে!', 'success');
+    } else {
+      await push(ref(db, 'cakes'), cakeData);
+      showToast('নতুন কেক যুক্ত হয়েছে!', 'success');
+    }
+
+    closeModal();
+    cakeForm.reset();
+    resetImageSelection();
+  } catch (err) {
+    console.error(err);
+    showToast('এরর: ' + err.message, 'error');
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = editId ? 'আপডেট করুন' : 'সেভ করুন';
+  }
+});
+
+async function loadCakeForEdit(id) {
+  const snap = await get(ref(db, 'cakes/' + id));
+  if (!snap.exists()) { showToast('কেক পাওয়া যায়নি!', 'error'); return; }
+  const cake = snap.val();
+  
+  document.getElementById('editCakeId').value = id;
+  document.getElementById('cakeName').value = cake.name || '';
+  document.getElementById('cakeDesc').value = cake.description || '';
+  document.getElementById('cakePrice').value = cake.price || '';
+  document.getElementById('cakeOfferPrice').value = cake.offerPrice || '';
+  document.getElementById('cakeOfferTitle').value = cake.offerTitle || '';
+  document.getElementById('cakeDisable').checked = cake.disabled || false;
+  
+  resetImageSelection();
+  if (cake.image) {
+    currentUploadedUrl = cake.image;
+    imagePreview.src = cake.image;
+    dropZoneContent.classList.add('hidden');
+    previewContainer.classList.remove('hidden');
+  }
+  
+  formTitle.textContent = '✏️ কেক এডিট করুন';
+  submitBtn.textContent = 'আপডেট করুন';
+  openModal(true);
+}
+
+async function deleteCake(id) {
+  if (!confirm('আপনি কি নিশ্চিতভাবে এই কেকটি ডিলিট করতে চান?')) return;
+  try {
+    await remove(ref(db, 'cakes/' + id));
+    showToast('কেক ডিলিট হয়েছে!', 'success');
+  } catch (err) {
+    showToast('ডিলিট ব্যর্থ: ' + err.message, 'error');
+  }
+}
+</script>
+</body>
+</html>
